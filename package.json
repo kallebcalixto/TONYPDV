@@ -1,0 +1,41 @@
+{
+  "name": "tony-pdv",
+  "version": "1.0.0",
+  "description": "Sistema PDV Profissional com Baixa de Estoque",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "make-x64": "electron-forge make --arch=x64",
+    "make-ia32": "electron-forge make --arch=ia32"
+  },
+  "keywords": [],
+  "author": "Tony Bertoldi",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0",
+    "@electron-forge/maker-squirrel": "^6.0.0",
+    "electron": "latest"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "firebase": "^10.8.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "TonyPDV",
+        "executableName": "TonyPDV"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "TonyPDV"
+          }
+        }
+      ]
+    }
+  }
+}

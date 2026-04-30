@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Acesso Admin | Tony PDV</title>
+    <style>
+        body { background: #0f172a; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: sans-serif; margin: 0; }
+        .login-card { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; width: 300px; }
+        h2 { color: white; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: none; background: #1e293b; color: white; outline: none; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>Painel Admin</h2>
+        <input type="password" id="senhaAdmin" placeholder="Senha de Gerência" autofocus>
+        <button onclick="logar()">Entrar</button>
+    </div>
+
+    <script>
+        function logar() {
+            const senha = document.getElementById('senhaAdmin').value;
+            // Senha Admin também atualizada para: loginvitoria
+            if(senha === "tony1979") {
+                sessionStorage.setItem("logado", "true");
+                window.location.href = "admin.html";
+            } else {
+                alert("Senha Incorreta!");
+                document.getElementById('senhaAdmin').value = "";
+            }
+        }
+        document.getElementById('senhaAdmin').addEventListener('keypress', (e) => { if (e.key === 'Enter') logar(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg-app: #f8fafc;
+    --bg-card: #ffffff;
+    --sidebar: #0f172a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 16px;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+* { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { margin: 0; background-color: var(--bg-app); color: var(--text-main); }
+
+/* LAYOUT ESTRUTURAL */
+.pdv-container, .admin-layout { display: flex; height: 100vh; overflow: hidden; }
+
+/* VENDEDOR (INDEX) */
+.grid-vendedor { flex: 1; padding: 32px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; overflow-y: auto; align-content: start; }
+.card-item { background: var(--bg-card); border-radius: var(--radius); padding: 16px; text-align: center; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.card-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary); }
+.card-item img { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+.card-item h4 { margin: 8px 0; font-weight: 600; }
+.card-item .preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; }
+
+/* CHECKOUT LATERAL */
+.checkout { width: 420px; background: var(--bg-card); border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; box-shadow: -4px 0 10px rgba(0,0,0,0.02); }
+.scroll-itens { flex: 1; overflow-y: auto; margin: 20px 0; }
+.item-linha { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg-app); font-weight: 500; }
+.total-box { background: var(--bg-app); padding: 24px; border-radius: var(--radius); margin-top: auto; }
+.total-box h1 { margin: 0 0 16px 0; display: flex; justify-content: space-between; font-size: 1.8rem; }
+.btn-finalizar { background: var(--success); color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+
+/* ADMIN (DASHBOARD) */
+.sidebar { width: 300px; background: var(--sidebar); color: white; padding: 32px; display: flex; flex-direction: column; }
+.sidebar h2 { color: var(--primary); font-weight: 800; letter-spacing: -1px; }
+.fin-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 20px; }
+.fin-card small { color: var(--text-muted); font-weight: 700; font-size: 10px; text-transform: uppercase; }
+.fin-card h3 { margin: 5px 0 0 0; font-size: 1.4rem; }
+
+.main-admin { flex: 1; padding: 40px; overflow-y: auto; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.glass-card { background: var(--bg-card); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+/* TABELAS E INPUTS */
+input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; }
+td { padding: 16px 12px; border-bottom: 1px solid var(--bg-app); }
