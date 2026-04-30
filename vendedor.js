@@ -2,7 +2,12 @@ let carrinho = [];
 let senhaMestra = "";
 const somCaixa = new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3');
 
-// Monitora produtos e estoque para o vendedor[cite: 7]
+// BUSCA A SENHA DINÂMICA DO FIREBASE
+database.ref('configuracoes/senhaCaixa').on('value', snapshot => {
+    senhaMestra = snapshot.val();
+});
+
+// Monitora produtos para o vendedor[cite: 4]
 database.ref('produtos').on('value', snapshot => {
     const div = document.getElementById('grade-produtos');
     div.innerHTML = "";
@@ -13,7 +18,7 @@ database.ref('produtos').on('value', snapshot => {
             const esgotado = p.estoque <= 0;
             div.innerHTML += `
                 <div class="card-item" style="${esgotado ? 'opacity:0.5; filter:grayscale(1)' : ''}" 
-                     onclick="${!esgotado ? `add('${id}', '${p.nome}', ${p.preco})` : "alert('Produto esgotado!')"}">
+                    onclick="${!esgotado ? `add('${id}', '${p.nome}', ${p.preco})` : "alert('Produto esgotado!')"}">
                     <img src="${p.foto || 'https://via.placeholder.com/200x140'}">
                     <h4>${p.nome}</h4>
                     <span class="preco">R$ ${p.preco.toFixed(2)}</span>
@@ -23,9 +28,6 @@ database.ref('produtos').on('value', snapshot => {
     }
 });
 
-database.ref('configuracao/senhaCaixa').on('value', s => { senhaMestra = s.val(); });
-
-// Adiciona ao carrinho salvando o ID para garantir a baixa correta[cite: 7]
 function add(id, nome, preco) {
     carrinho.push({ id, nome, preco: parseFloat(preco) });
     render();
@@ -41,42 +43,37 @@ function render() {
     document.getElementById('total-caixa').innerText = t.toFixed(2);
 }
 
-// FINALIZAÇÃO COM BAIXA REAL NO ESTOQUE[cite: 7]
+// FINALIZAÇÃO COM SENHA DINÂMICA E BAIXA DE ESTOQUE[cite: 4]
 function finalizar() {
-    if (carrinho.length === 0) return;
+    if (carrinho.length === 0) return alert("Carrinho vazio!");
     
-    if (prompt("Senha do Caixa:") === senhaMestra) {
+    if (prompt("Digite a Senha do Caixa para finalizar:") === senhaMestra) {
         somCaixa.play();
         const totalVenda = document.getElementById('total-caixa').innerText;
 
-        // 1. Registra a venda no financeiro[cite: 7]
         database.ref('vendas').push({
             total: totalVenda,
             data: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            
-            // 2. BAIXA AUTOMÁTICA VIA TRANSACTION (Garante a precisão)[cite: 7]
+            // Baixa automática no estoque via Transaction[cite: 4]
             carrinho.forEach(item => {
-                const produtoRef = database.ref('produtos/' + item.id);
-                produtoRef.transaction((produto) => {
-                    if (produto) {
-                        if (produto.estoque > 0) {
-                            produto.estoque = produto.estoque - 1;
-                        }
+                database.ref('produtos/' + item.id).transaction((produto) => {
+                    if (produto && produto.estoque > 0) {
+                        produto.estoque -= 1;
                     }
                     return produto;
                 });
             });
 
             setTimeout(() => { 
-                alert("Venda Concluída! O estoque foi baixado com sucesso."); 
+                alert("Venda Concluída com sucesso! ✅"); 
                 carrinho = []; 
                 render(); 
             }, 500);
         });
     } else {
-        alert("Senha incorreta!");
+        alert("Senha do caixa incorreta!");
     }
 }
 
-function limpar() { carrinho = []; render(); }
+function limpar() { if(confirm("Limpar carrinho?")) { carrinho = []; render(); } }
