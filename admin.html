@@ -2,10 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <title>Tony PDV | Admin</title>
+    <title>Tony PDV | Admin Profissional</title>
 </head>
 <body>
     <script>
@@ -15,42 +16,60 @@
     <div class="admin-layout">
         <nav class="sidebar">
             <h2>TONY<span>PDV</span></h2>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:30px">GESTÃO E ESTOQUE</p>
+            
             <div class="fin-card">
                 <small>Vendas Totais</small>
                 <h3 id="total-vendas">R$ 0.00</h3>
             </div>
-            <div class="fin-card">
-                <small>Lucro Líquido</small>
-                <h3 id="total-lucro">R$ 0.00</h3>
+            <div class="fin-card" style="border-left: 4px solid var(--danger)">
+                <small>Compras/Insumos</small>
+                <h3 id="total-insumos">R$ 0.00</h3>
             </div>
-            <button onclick="sessionStorage.clear(); window.location.href='index.html';" style="width:100%; padding:10px; cursor:pointer; margin-top:20px;">Sair</button>
+            <div class="fin-card" style="background:var(--primary)">
+                <small style="color:white">Lucro Líquido</small>
+                <h3 id="total-lucro" style="color:white">R$ 0.00</h3>
+            </div>
+
+            <button onclick="zerarMes()" style="background:rgba(239,68,68,0.1); color:var(--danger); border:1px solid var(--danger); padding:10px; border-radius:8px; cursor:pointer; margin-top:20px; width:100%">Zerar Mês</button>
+            <button onclick="sessionStorage.clear(); window.location.href='index.html';" style="background:none; color:white; border:1px solid rgba(255,255,255,0.2); padding:10px; border-radius:8px; cursor:pointer; margin-top:10px; width:100%">Sair do Admin</button>
         </nav>
 
         <main class="main-admin">
-            <h1>Gestão Profissional</h1>
+            <header style="margin-bottom:40px">
+                <h1 style="margin:0">Painel de Controle</h1>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <p style="color:var(--text-muted)">Controle de produtos, estoque e financeiro.</p>
+                    <div class="badge-venda">Vendas em Tempo Real</div>
+                </div>
+            </header>
+
             <div class="admin-grid">
+                <!-- Cadastro de Produtos com Estoque -->
                 <section class="glass-card">
                     <h3>📦 Novo Produto</h3>
-                    <input type="text" id="nomeProd" placeholder="Nome">
-                    <input type="number" id="precoProd" placeholder="Preço">
-                    <input type="number" id="estoqueProd" placeholder="Estoque">
+                    <input type="text" id="nomeProd" placeholder="Nome do Produto">
+                    <input type="number" id="precoProd" placeholder="Preço de Venda">
+                    <input type="number" id="estoqueProd" placeholder="Quantia em Estoque">
                     <input type="text" id="fotoProd" placeholder="Link da Foto">
-                    <button onclick="salvarProduto()">Salvar Produto</button>
+                    <button onclick="salvarProduto()" style="background:var(--primary); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Cadastrar Item</button>
                 </section>
 
+                <!-- Lançamento de Gastos -->
                 <section class="glass-card">
-                    <h3>💸 Lançar Insumo</h3>
-                    <input type="text" id="nomeInsumo" placeholder="Ex: Carne, Luz">
+                    <h3>💸 Lançar Gasto/Insumo</h3>
+                    <input type="text" id="nomeInsumo" placeholder="Ex: Carne, Bebidas, Luz">
                     <input type="number" id="valorInsumo" placeholder="Valor R$">
-                    <button onclick="salvarInsumo()">Registrar Gasto</button>
+                    <button onclick="salvarInsumo()" style="background:var(--text-main); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Registrar Gasto</button>
                 </section>
 
+                <!-- Gestão de Itens e Senha -->
                 <section class="glass-card" style="grid-column: span 2">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
-                        <h3>🛠 Estoque e Senha do Caixa</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                        <h3>🛠 Estoque e Segurança</h3>
                         <div style="display:flex; gap:10px">
-                            <input type="text" id="senhaCaixa" placeholder="Nova Senha Caixa" style="margin:0; width:150px">
-                            <button onclick="atualizarSenhaCaixa()" style="background:#22c55e; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer">Atualizar Senha</button>
+                            <input type="text" id="senhaCaixa" placeholder="Senha Vendedor" style="margin:0; width:150px">
+                            <button onclick="atualizarSenhaCaixa()" style="background:var(--success); color:white; border:none; padding:0 15px; border-radius:8px; cursor:pointer">Salvar Senha</button>
                         </div>
                     </div>
                     <table>
@@ -58,8 +77,8 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Preço</th>
-                                <th>Estoque</th>
-                                <th>Ações</th>
+                                <th>Estoque Atual</th>
+                                <th>Ação</th>
                             </tr>
                         </thead>
                         <tbody id="lista-corpo"></tbody>
