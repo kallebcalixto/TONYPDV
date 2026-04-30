@@ -2,6 +2,23 @@ let totalVendas = 0;
 let totalInsumos = 0;
 let editandoId = null;
 
+// FUNÇÃO PARA SALVAR NOVA SENHA DO CAIXA[cite: 1, 2]
+function atualizarSenhaCaixa() {
+    const novaSenha = document.getElementById('senhaCaixa').value;
+    if (novaSenha.trim() !== "") {
+        database.ref('configuracoes').update({
+            senhaCaixa: novaSenha
+        }).then(() => {
+            alert("Senha do Caixa atualizada com sucesso! ✅");
+            document.getElementById('senhaCaixa').value = "";
+        }).catch((erro) => {
+            alert("Erro ao salvar senha no banco de dados.");
+        });
+    } else {
+        alert("Digite uma senha válida.");
+    }
+}
+
 // Salvar ou Editar Produto[cite: 2]
 function salvarProduto() {
     const nome = document.getElementById('nomeProd').value;
@@ -20,7 +37,7 @@ function salvarProduto() {
     }
 }
 
-// Monitor de Estoque em Tempo Real[cite: 2]
+// Monitor de Estoque e Tabela[cite: 2]
 database.ref('produtos').on('value', snapshot => {
     const body = document.getElementById('lista-corpo');
     body.innerHTML = "";
@@ -43,7 +60,7 @@ database.ref('produtos').on('value', snapshot => {
     }
 });
 
-// Lógica Financeira[cite: 2]
+// Lógica Financeira e Insumos[cite: 2]
 database.ref('vendas').on('value', s => {
     totalVendas = 0;
     if (s.val()) Object.values(s.val()).forEach(v => totalVendas += parseFloat(v.total));
@@ -62,14 +79,6 @@ function calcFinanceiro() {
     document.getElementById('total-lucro').innerText = "R$ " + (totalVendas - totalInsumos).toFixed(2);
 }
 
-function prepararEdicao(id, nome, preco, estoque, foto) {
-    editandoId = id;
-    document.getElementById('nomeProd').value = nome;
-    document.getElementById('precoProd').value = preco;
-    document.getElementById('estoqueProd').value = estoque;
-    document.getElementById('fotoProd').value = foto;
-}
-
 function salvarInsumo() {
     const nome = document.getElementById('nomeInsumo').value;
     const valor = parseFloat(document.getElementById('valorInsumo').value);
@@ -77,6 +86,14 @@ function salvarInsumo() {
         database.ref('insumos').push({ nome, valor });
         limparCampos(['nomeInsumo', 'valorInsumo']);
     }
+}
+
+function prepararEdicao(id, nome, preco, estoque, foto) {
+    editandoId = id;
+    document.getElementById('nomeProd').value = nome;
+    document.getElementById('precoProd').value = preco;
+    document.getElementById('estoqueProd').value = estoque;
+    document.getElementById('fotoProd').value = foto;
 }
 
 function removerItem(caminho) { if (confirm("Deseja remover?")) database.ref(caminho).remove(); }
