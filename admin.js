@@ -97,4 +97,22 @@ function prepararEdicao(id, nome, preco, estoque, foto) {
 }
 
 function removerItem(caminho) { if (confirm("Deseja remover?")) database.ref(caminho).remove(); }
+
 function limparCampos(ids) { ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; }); }
+
+// FUNÇÃO PARA ZERAR VENDAS E GASTOS (Zerar Mês)[cite: 12, 13]
+function zerarMes() {
+    if (confirm("⚠️ ATENÇÃO: Deseja realmente zerar todas as vendas e gastos? Isso não pode ser desfeito.")) {
+        database.ref('vendas').remove()
+            .then(() => {
+                return database.ref('insumos').remove();
+            })
+            .then(() => {
+                alert("Mês zerado com sucesso! ✅");
+            })
+            .catch((error) => {
+                console.error("Erro ao zerar dados:", error);
+                alert("Erro ao tentar zerar os dados.");
+            });
+    }
+}
