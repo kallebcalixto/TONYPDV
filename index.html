@@ -9,10 +9,7 @@
 </head>
 <body>
     <script>
-        // Bloqueia acesso sem login prévio
-        if(sessionStorage.getItem("acesso_vendedor") !== "true") {
-            window.location.href = "login-vendedor.html";
-        }
+        if(sessionStorage.getItem("acesso_vendedor") !== "true") window.location.href = "login-vendedor.html";
     </script>
 
     <div class="pdv-container">
@@ -24,18 +21,15 @@
                     <h2 style="margin:0">Carrinho</h2>
                     <small id="data-atual" style="color:var(--text-muted)"></small>
                 </div>
-                <button onclick="window.location.href='login.html'" 
-                        style="background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px;">
-                    ADMIN ⚙️
-                </button>
+                <button onclick="window.location.href='login.html'" style="background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px;">ADMIN ⚙️</button>
             </header>
 
             <div id="itens-checkout" class="scroll-itens"></div>
 
             <div class="total-box">
                 <h1>Total <span>R$ <span id="total-caixa">0.00</span></span></h1>
-                <button class="btn-finalizar" onclick="finalizar()">FINALIZAR VENDA</button>
-                <button style="background:none; border:none; color:var(--danger); cursor:pointer; width:100%; margin-top:10px" onclick="limpar()">Limpar Tudo</button>
+                <button class="btn-finalizar" onclick="finalizarVenda()">FINALIZAR VENDA</button>
+                <button style="background:none; border:none; color:var(--danger); cursor:pointer; width:100%; margin-top:10px; font-weight:bold" onclick="limpar()">Limpar Tudo</button>
             </div>
         </aside>
     </div>
