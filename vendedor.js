@@ -1,86 +1,107 @@
-let carrinho = [];
-let senhaMestra = "";
-
-// BUSCA SENHA ATUALIZADA
-database.ref('configuracoes/senhaCaixa').on('value', snapshot => {
-    senhaMestra = snapshot.val();
-});
-
-// CARREGA PRODUTOS NA GRADE
 database.ref('produtos').on('value', snapshot => {
-    const div = document.getElementById('grade-produtos');
-    div.innerHTML = "";
-    const dados = snapshot.val();
-    if (dados) {
-        Object.keys(dados).forEach(id => {
-            const p = dados[id];
-            const esgotado = p.estoque <= 0;
-            div.innerHTML += `
-                <div class="card-item" style="${esgotado ? 'opacity:0.5; filter:grayscale(1)' : ''}" 
-                    onclick="${!esgotado ? `add('${id}', '${p.nome}', ${p.preco})` : "alert('Esgotado!')"}">
-                    <img src="${p.foto || 'https://via.placeholder.com/150'}">
+    const grade = document.getElementById('grade-produtos');
+    if (!grade) return;
+    grade.innerHTML = "";
+    snapshot.forEach(item => {
+        const p = item.val();
+        if (p.estoque > 0) {
+            grade.innerHTML += `
+                <div class="card-item" onclick="adicionarAoCarrinho('${item.key}', '${p.nome}', ${p.preco})">
+                    <img src="${p.foto || 'https://via.placeholder.com/150'}" alt="${p.nome}">
                     <h4>${p.nome}</h4>
-                    <span class="preco">R$ ${p.preco.toFixed(2)}</span>
-                    <small>Estoque: ${p.estoque}</small>
+                    <p class="preco">R$ ${p.preco.toFixed(2)}</p>
+                    <small style="color:var(--text-muted)">Estoque: ${p.estoque}</small>
                 </div>`;
-        });
-    }
+        }
+    });
 });
 
-function add(id, nome, preco) {
-    carrinho.push({ id, nome, preco: parseFloat(preco) });
-    render();
+let carrinho = [];
+
+function adicionarAoCarrinho(id, nome, preco) {
+    carrinho.push({ id, nome, preco });
+    renderizarCarrinho();
 }
 
-function render() {
-    const lista = document.getElementById('itens-checkout');
-    const totalCaixa = document.getElementById('total-caixa');
-    let t = 0;
-    lista.innerHTML = carrinho.map(i => {
-        t += i.preco;
-        return `<div class="item-linha"><span>${i.nome}</span><b>R$ ${i.preco.toFixed(2)}</b></div>`;
-    }).join('');
-    totalCaixa.innerText = t.toFixed(2);
+function renderizarCarrinho() {
+    const itens = document.getElementById('itens-checkout');
+    const totalTxt = document.getElementById('total-caixa');
+    itens.innerHTML = "";
+    let total = 0;
+    carrinho.forEach((item, index) => {
+        total += item.preco;
+        itens.innerHTML += `
+            <div class="item-linha">
+                <span>${item.nome}</span>
+                <span>R$ ${item.preco.toFixed(2)} 
+                    <button onclick="removerDoCarrinho(${index})" style="background:none; border:none; color:red; cursor:pointer">✕</button>
+                </span>
+            </div>`;
+    });
+    totalTxt.innerText = total.toFixed(2);
 }
 
-// FINALIZAR VENDA
-function finalizar() {
-    if (carrinho.length === 0) return alert("Carrinho vazio!");
+function removerDoCarrinho(i) { carrinho.splice(i, 1); renderizarCarrinho(); }
+function limpar() { carrinho = []; renderizarCarrinho(); }
 
-    const metodo = prompt("Escolha o método:\n1 - Dinheiro / Pix\n2 - Fiado (Mensalista)");
-    if (metodo !== "1" && metodo !== "2") return alert("Opção inválida!");
+async function validarVendedor() {
+    const senha = prompt("SENHA DO VENDEDOR PARA FINALIZAR:");
+    if (!senha) return null;
+    const snap = await database.ref('vendedores').once('value');
+    const lista = snap.val();
+    if (lista) {
+        for (let nome in lista) { if (lista[nome].senha === senha) return nome; }
+    }
+    return null;
+}
 
-    let nomeCliente = "";
-    if (metodo === "2") {
-        nomeCliente = prompt("Digite o nome do cliente:");
-        if (!nomeCliente) return alert("Nome obrigatório para fiado!");
+async function finalizarVenda() {
+    const totalVenda = parseFloat(document.getElementById('total-caixa').innerText);
+    if (totalVenda <= 0) return alert("Carrinho vazio!");
+
+    // 1. ESCOLHER TIPO
+    const opcao = prompt("Escolha a opção:\n1 - Dinheiro ou Pix\n2 - Fiado Mensalista");
+    if (!opcao) return;
+
+    let clienteFiado = null;
+    let metodoVenda = "";
+
+    if (opcao === "1") {
+        metodoVenda = "Dinheiro/Pix";
+    } else if (opcao === "2") {
+        metodoVenda = "Fiado";
+        clienteFiado = prompt("DIGITE O NOME DO MENSALISTA:");
+        if (!clienteFiado) return alert("Nome necessário para fiado!");
+    } else {
+        return alert("Opção inválida!");
     }
 
-    if (prompt("Digite a Senha do Caixa:") === senhaMestra) {
-        const totalVenda = parseFloat(document.getElementById('total-caixa').innerText);
-        
-        // SE FOR DINHEIRO (1), VAI PARA VENDAS. SE FOR FIADO (2), VAI PARA MENSALISTAS.
-        if (metodo === "1") {
-            database.ref('vendas').push({ total: totalVenda, data: new Date().toLocaleString() });
-        } else {
-            const refM = database.ref('mensalistas/' + nomeCliente + '/saldo_devedor');
-            refM.transaction(atual => (atual || 0) + totalVenda);
-        }
+    // 2. SENHA DO VENDEDOR PARA VALIDAR
+    const vendedorNome = await validarVendedor();
+    if (!vendedorNome) return alert("Senha incorreta ou cancelado!");
 
-        // BAIXA NO ESTOQUE (SEMPRE OCORRE)
-        carrinho.forEach(item => {
-            database.ref('produtos/' + item.id).transaction(p => {
-                if (p) p.estoque = (p.estoque || 0) - 1;
-                return p;
+    // 3. GRAVAR NO BANCO E BAIXAR ESTOQUE
+    if (opcao === "1") {
+        database.ref('vendas').push({
+            total: totalVenda,
+            vendedor: vendedorNome,
+            data: new Date().toLocaleString(),
+            metodo: metodoVenda
+        }).then(() => concluirProcesso(vendedorNome));
+    } else {
+        database.ref('mensalistas/' + clienteFiado).once('value').then(s => {
+            const saldo = (s.val() ? s.val().saldo_devedor : 0) + totalVenda;
+            database.ref('mensalistas/' + clienteFiado).update({ saldo_devedor: saldo }).then(() => {
+                concluirProcesso(vendedorNome, clienteFiado);
             });
         });
-
-        alert("Concluído! ✅");
-        carrinho = [];
-        render();
-    } else {
-        alert("Senha incorreta!");
     }
 }
 
-function limpar() { if(confirm("Limpar tudo?")) { carrinho = []; render(); } }
+function concluirProcesso(vendedor, cliente = null) {
+    carrinho.forEach(item => {
+        database.ref('produtos/' + item.id + '/estoque').transaction(a => (a || 0) - 1);
+    });
+    alert(cliente ? `Lançado para ${cliente}!` : `Venda concluída!`);
+    limpar();
+}
