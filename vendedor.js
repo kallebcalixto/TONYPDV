@@ -1,13 +1,12 @@
 let carrinho = [];
 let senhaMestra = "";
-const somCaixa = new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3');
 
-// BUSCA A SENHA DINÂMICA DO FIREBASE
+// BUSCA SENHA ATUALIZADA
 database.ref('configuracoes/senhaCaixa').on('value', snapshot => {
     senhaMestra = snapshot.val();
 });
 
-// Monitora produtos para o vendedor[cite: 4]
+// CARREGA PRODUTOS NA GRADE
 database.ref('produtos').on('value', snapshot => {
     const div = document.getElementById('grade-produtos');
     div.innerHTML = "";
@@ -18,11 +17,11 @@ database.ref('produtos').on('value', snapshot => {
             const esgotado = p.estoque <= 0;
             div.innerHTML += `
                 <div class="card-item" style="${esgotado ? 'opacity:0.5; filter:grayscale(1)' : ''}" 
-                    onclick="${!esgotado ? `add('${id}', '${p.nome}', ${p.preco})` : "alert('Produto esgotado!')"}">
-                    <img src="${p.foto || 'https://via.placeholder.com/200x140'}">
+                    onclick="${!esgotado ? `add('${id}', '${p.nome}', ${p.preco})` : "alert('Esgotado!')"}">
+                    <img src="${p.foto || 'https://via.placeholder.com/150'}">
                     <h4>${p.nome}</h4>
                     <span class="preco">R$ ${p.preco.toFixed(2)}</span>
-                    <p style="font-size:11px; color:${p.estoque < 5 ? 'red' : 'gray'}">Estoque: ${p.estoque} un</p>
+                    <small>Estoque: ${p.estoque}</small>
                 </div>`;
         });
     }
@@ -35,45 +34,53 @@ function add(id, nome, preco) {
 
 function render() {
     const lista = document.getElementById('itens-checkout');
+    const totalCaixa = document.getElementById('total-caixa');
     let t = 0;
     lista.innerHTML = carrinho.map(i => {
         t += i.preco;
         return `<div class="item-linha"><span>${i.nome}</span><b>R$ ${i.preco.toFixed(2)}</b></div>`;
     }).join('');
-    document.getElementById('total-caixa').innerText = t.toFixed(2);
+    totalCaixa.innerText = t.toFixed(2);
 }
 
-// FINALIZAÇÃO COM SENHA DINÂMICA E BAIXA DE ESTOQUE[cite: 4]
+// FINALIZAR VENDA
 function finalizar() {
     if (carrinho.length === 0) return alert("Carrinho vazio!");
-    
-    if (prompt("Digite a Senha do Caixa para finalizar:") === senhaMestra) {
-        somCaixa.play();
-        const totalVenda = document.getElementById('total-caixa').innerText;
 
-        database.ref('vendas').push({
-            total: totalVenda,
-            data: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
-            // Baixa automática no estoque via Transaction[cite: 4]
-            carrinho.forEach(item => {
-                database.ref('produtos/' + item.id).transaction((produto) => {
-                    if (produto && produto.estoque > 0) {
-                        produto.estoque -= 1;
-                    }
-                    return produto;
-                });
+    const metodo = prompt("Escolha o método:\n1 - Dinheiro / Pix\n2 - Fiado (Mensalista)");
+    if (metodo !== "1" && metodo !== "2") return alert("Opção inválida!");
+
+    let nomeCliente = "";
+    if (metodo === "2") {
+        nomeCliente = prompt("Digite o nome do cliente:");
+        if (!nomeCliente) return alert("Nome obrigatório para fiado!");
+    }
+
+    if (prompt("Digite a Senha do Caixa:") === senhaMestra) {
+        const totalVenda = parseFloat(document.getElementById('total-caixa').innerText);
+        
+        // SE FOR DINHEIRO (1), VAI PARA VENDAS. SE FOR FIADO (2), VAI PARA MENSALISTAS.
+        if (metodo === "1") {
+            database.ref('vendas').push({ total: totalVenda, data: new Date().toLocaleString() });
+        } else {
+            const refM = database.ref('mensalistas/' + nomeCliente + '/saldo_devedor');
+            refM.transaction(atual => (atual || 0) + totalVenda);
+        }
+
+        // BAIXA NO ESTOQUE (SEMPRE OCORRE)
+        carrinho.forEach(item => {
+            database.ref('produtos/' + item.id).transaction(p => {
+                if (p) p.estoque = (p.estoque || 0) - 1;
+                return p;
             });
-
-            setTimeout(() => { 
-                alert("Venda Concluída com sucesso! ✅"); 
-                carrinho = []; 
-                render(); 
-            }, 500);
         });
+
+        alert("Concluído! ✅");
+        carrinho = [];
+        render();
     } else {
-        alert("Senha do caixa incorreta!");
+        alert("Senha incorreta!");
     }
 }
 
-function limpar() { if(confirm("Limpar carrinho?")) { carrinho = []; render(); } }
+function limpar() { if(confirm("Limpar tudo?")) { carrinho = []; render(); } }
