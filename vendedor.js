@@ -44,17 +44,6 @@ function renderizarCarrinho() {
 function removerDoCarrinho(i) { carrinho.splice(i, 1); renderizarCarrinho(); }
 function limpar() { carrinho = []; renderizarCarrinho(); }
 
-async function validarVendedor() {
-    const senha = prompt("SENHA DO VENDEDOR PARA FINALIZAR:");
-    if (!senha) return null;
-    const snap = await database.ref('vendedores').once('value');
-    const lista = snap.val();
-    if (lista) {
-        for (let nome in lista) { if (lista[nome].senha === senha) return nome; }
-    }
-    return null;
-}
-
 async function finalizarVenda() {
     const totalVenda = parseFloat(document.getElementById('total-caixa').innerText);
     if (totalVenda <= 0) return alert("Carrinho vazio!");
@@ -76,32 +65,44 @@ async function finalizarVenda() {
         return alert("Opção inválida!");
     }
 
-    // 2. SENHA DO VENDEDOR PARA VALIDAR
-    const vendedorNome = await validarVendedor();
-    if (!vendedorNome) return alert("Senha incorreta ou cancelado!");
+    // 2. SENHA DO VENDEDOR
+    const senha = prompt("SENHA DO VENDEDOR PARA FINALIZAR:");
+    if (!senha) return;
 
-    // 3. GRAVAR NO BANCO E BAIXAR ESTOQUE
+    const snap = await database.ref('vendedores').once('value');
+    const lista = snap.val();
+    let vendedorNome = null;
+
+    if (lista) {
+        for (let nome in lista) {
+            if (lista[nome].senha === senha) vendedorNome = nome;
+        }
+    }
+
+    if (!vendedorNome) return alert("Senha incorreta!");
+
+    // 3. GRAVAR
     if (opcao === "1") {
         database.ref('vendas').push({
             total: totalVenda,
             vendedor: vendedorNome,
             data: new Date().toLocaleString(),
             metodo: metodoVenda
-        }).then(() => concluirProcesso(vendedorNome));
+        }).then(() => concluir(vendedorNome));
     } else {
         database.ref('mensalistas/' + clienteFiado).once('value').then(s => {
             const saldo = (s.val() ? s.val().saldo_devedor : 0) + totalVenda;
             database.ref('mensalistas/' + clienteFiado).update({ saldo_devedor: saldo }).then(() => {
-                concluirProcesso(vendedorNome, clienteFiado);
+                concluir(vendedorNome, clienteFiado);
             });
         });
     }
 }
 
-function concluirProcesso(vendedor, cliente = null) {
+function concluir(vendedor, cliente = null) {
     carrinho.forEach(item => {
         database.ref('produtos/' + item.id + '/estoque').transaction(a => (a || 0) - 1);
     });
-    alert(cliente ? `Lançado para ${cliente}!` : `Venda concluída!`);
+    alert(cliente ? `Lançado para ${cliente}!` : `Venda concluída!\nResponsável: ${vendedor}`);
     limpar();
 }
