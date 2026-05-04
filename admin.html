@@ -19,15 +19,19 @@
             <p style="color:var(--text-muted); font-size:12px; margin-bottom:30px">GESTÃO E ESTOQUE</p>
             
             <div class="fin-card">
-                <small>Vendas Totais</small>
+                <small>Vendas Totais (Dinheiro)</small>
                 <h3 id="total-vendas">R$ 0.00</h3>
+            </div>
+            <div class="fin-card" style="border-left: 4px solid var(--warning)">
+                <small>Pendentes (Fiado)</small>
+                <h3 id="total-fiados" style="color:var(--warning)">R$ 0.00</h3>
             </div>
             <div class="fin-card" style="border-left: 4px solid var(--danger)">
                 <small>Compras/Insumos</small>
                 <h3 id="total-insumos">R$ 0.00</h3>
             </div>
             <div class="fin-card" style="background:var(--primary)">
-                <small style="color:white">Lucro Líquido</small>
+                <small style="color:white">Lucro Líquido Real</small>
                 <h3 id="total-lucro" style="color:white">R$ 0.00</h3>
             </div>
 
@@ -39,13 +43,12 @@
             <header style="margin-bottom:40px">
                 <h1 style="margin:0">Painel de Controle</h1>
                 <div style="display:flex; justify-content:space-between; align-items:center">
-                    <p style="color:var(--text-muted)">Controle de produtos, estoque e financeiro.</p>
-                    <div class="badge-venda">Vendas em Tempo Real</div>
+                    <p style="color:var(--text-muted)">Controle de produtos, estoque e mensalistas.</p>
+                    <div class="badge-venda">Sincronizado via Firebase</div>
                 </div>
             </header>
 
             <div class="admin-grid">
-                <!-- Cadastro de Produtos com Estoque -->
                 <section class="glass-card">
                     <h3>📦 Novo Produto</h3>
                     <input type="text" id="nomeProd" placeholder="Nome do Produto">
@@ -55,7 +58,6 @@
                     <button onclick="salvarProduto()" style="background:var(--primary); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Cadastrar Item</button>
                 </section>
 
-                <!-- Lançamento de Gastos -->
                 <section class="glass-card">
                     <h3>💸 Lançar Gasto/Insumo</h3>
                     <input type="text" id="nomeInsumo" placeholder="Ex: Carne, Bebidas, Luz">
@@ -63,10 +65,23 @@
                     <button onclick="salvarInsumo()" style="background:var(--text-main); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Registrar Gasto</button>
                 </section>
 
-                <!-- Gestão de Itens e Senha -->
+                <section class="glass-card" style="grid-column: span 2">
+                    <h3>📋 Clientes Mensalistas (Contas a Receber)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Saldo Devedor</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-fiados-body"></tbody>
+                    </table>
+                </section>
+
                 <section class="glass-card" style="grid-column: span 2">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                        <h3>🛠 Estoque e Segurança</h3>
+                        <h3>🛠 Estoque Atual</h3>
                         <div style="display:flex; gap:10px">
                             <input type="text" id="senhaCaixa" placeholder="Senha Vendedor" style="margin:0; width:150px">
                             <button onclick="atualizarSenhaCaixa()" style="background:var(--success); color:white; border:none; padding:0 15px; border-radius:8px; cursor:pointer">Salvar Senha</button>
@@ -77,7 +92,7 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Preço</th>
-                                <th>Estoque Atual</th>
+                                <th>Estoque</th>
                                 <th>Ação</th>
                             </tr>
                         </thead>
