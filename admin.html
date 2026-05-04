@@ -42,10 +42,7 @@
         <main class="main-admin">
             <header style="margin-bottom:40px">
                 <h1 style="margin:0">Painel de Controle</h1>
-                <div style="display:flex; justify-content:space-between; align-items:center">
-                    <p style="color:var(--text-muted)">Controle de produtos, estoque e mensalistas.</p>
-                    <div class="badge-venda">Sincronizado via Firebase</div>
-                </div>
+                <p style="color:var(--text-muted)">Gerencie produtos, vendedores, fiados e gastos mensais.</p>
             </header>
 
             <div class="admin-grid">
@@ -65,37 +62,42 @@
                     <button onclick="salvarInsumo()" style="background:var(--text-main); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Registrar Gasto</button>
                 </section>
 
+                <section class="glass-card">
+                    <h3>👥 Novo Vendedor</h3>
+                    <input type="text" id="nomeVendedor" placeholder="Nome do Vendedor">
+                    <input type="password" id="passVendedor" placeholder="Senha de Acesso">
+                    <button onclick="salvarVendedor()" style="background:var(--success); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Salvar Vendedor</button>
+                </section>
+
                 <section class="glass-card" style="grid-column: span 2">
-                    <h3>📋 Clientes Mensalistas (Contas a Receber)</h3>
+                    <h3>📊 Relatório de Vendas (Quem vendeu?)</h3>
+                    <div style="max-height:300px; overflow-y:auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Vendedor</th>
+                                    <th>Total</th>
+                                    <th>Método</th>
+                                </tr>
+                            </thead>
+                            <tbody id="relatorio-vendas-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="glass-card" style="grid-column: span 2">
+                    <h3>📋 Clientes Mensalistas (Fiados)</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Saldo Devedor</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Cliente</th><th>Saldo Devedor</th><th>Ação</th></tr></thead>
                         <tbody id="lista-fiados-body"></tbody>
                     </table>
                 </section>
 
                 <section class="glass-card" style="grid-column: span 2">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                        <h3>🛠 Estoque Atual</h3>
-                        <div style="display:flex; gap:10px">
-                            <input type="text" id="senhaCaixa" placeholder="Senha Vendedor" style="margin:0; width:150px">
-                            <button onclick="atualizarSenhaCaixa()" style="background:var(--success); color:white; border:none; padding:0 15px; border-radius:8px; cursor:pointer">Salvar Senha</button>
-                        </div>
-                    </div>
+                    <h3>🛠 Estoque Atual</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Preço</th>
-                                <th>Estoque</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Nome</th><th>Preço</th><th>Estoque</th><th>Ação</th></tr></thead>
                         <tbody id="lista-corpo"></tbody>
                     </table>
                 </section>
