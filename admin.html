@@ -42,7 +42,7 @@
         <main class="main-admin">
             <header style="margin-bottom:40px">
                 <h1 style="margin:0">Painel de Controle</h1>
-                <p style="color:var(--text-muted)">Gerencie produtos, vendedores, fiados e gastos mensais.</p>
+                <p style="color:var(--text-muted)">Controle de produtos, estoque, vendedores e gastos.</p>
             </header>
 
             <div class="admin-grid">
@@ -65,12 +65,12 @@
                 <section class="glass-card">
                     <h3>👥 Novo Vendedor</h3>
                     <input type="text" id="nomeVendedor" placeholder="Nome do Vendedor">
-                    <input type="password" id="passVendedor" placeholder="Senha de Acesso">
+                    <input type="password" id="passVendedor" placeholder="Senha (Para finalizar vendas)">
                     <button onclick="salvarVendedor()" style="background:var(--success); color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:600; cursor:pointer">Salvar Vendedor</button>
                 </section>
 
                 <section class="glass-card" style="grid-column: span 2">
-                    <h3>📊 Relatório de Vendas (Quem vendeu?)</h3>
+                    <h3>📊 Relatório de Vendas (Quem efetuou a venda)</h3>
                     <div style="max-height:300px; overflow-y:auto">
                         <table>
                             <thead>
@@ -87,7 +87,7 @@
                 </section>
 
                 <section class="glass-card" style="grid-column: span 2">
-                    <h3>📋 Clientes Mensalistas (Fiados)</h3>
+                    <h3>📋 Clientes Mensalistas (Contas a Receber)</h3>
                     <table>
                         <thead><tr><th>Cliente</th><th>Saldo Devedor</th><th>Ação</th></tr></thead>
                         <tbody id="lista-fiados-body"></tbody>
