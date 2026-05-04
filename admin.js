@@ -35,7 +35,7 @@ function salvarInsumo() {
     const valor = parseFloat(document.getElementById('valorInsumo').value);
     if (nome && valor) {
         database.ref('insumos').push({ nome, valor }).then(() => {
-            alert("Gasto registrado! ✅");
+            alert("Gasto registrado!");
             limparCampos(['nomeInsumo', 'valorInsumo']);
         });
     }
@@ -74,16 +74,16 @@ database.ref('insumos').on('value', s => {
     calcFinanceiro();
 });
 
-database.ref('mensalistas').on('value', snapshot => {
+database.ref('mensalistas').on('value', s => {
     totalFiados = 0;
     const body = document.getElementById('lista-fiados-body');
     body.innerHTML = "";
-    snapshot.forEach(item => {
+    s.forEach(item => {
         const nome = item.key;
         const saldo = item.val().saldo_devedor;
         totalFiados += saldo;
         body.innerHTML += `<tr><td>${nome}</td><td>R$ ${saldo.toFixed(2)}</td>
-            <td><button onclick="receberFiado('${nome}', ${saldo})" style="color:var(--success); font-weight:bold">BAIXAR FIADO</button></td></tr>`;
+            <td><button onclick="receberFiado('${nome}', ${saldo})" style="color:var(--success); font-weight:bold">BAIXAR</button></td></tr>`;
     });
     calcFinanceiro();
 });
@@ -91,7 +91,7 @@ database.ref('mensalistas').on('value', snapshot => {
 function receberFiado(nome, valor) {
     if (confirm(`Confirmar pagamento de ${nome}?`)) {
         database.ref('mensalistas/' + nome).remove();
-        database.ref('vendas').push({ total: valor, vendedor: 'Pagto Fiado', data: new Date().toLocaleString(), metodo: 'Recebimento' });
+        database.ref('vendas').push({ total: valor, vendedor: 'Recebimento Fiado', data: new Date().toLocaleString(), metodo: 'Recebimento' });
     }
 }
 
